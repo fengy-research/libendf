@@ -7,12 +7,17 @@ VALAFLAGS= --library=libendf -H libendf.h
 VALADOCFLAGS = -o Documentation --package-name=libendf
 VALAPKGS = --pkg gsl
 
-libendf= \
+libendf_la_SOURCES= \
 	$(VALASOURCES:.vala=.c)\
 	libendf.h
 
 VALASOURCES = \
-	libendf.vala
+	enum.vala \
+	mat-type.vala \
+	mf-type.vala \
+	mt-type.vala \
+	event.vala \
+	parser.vala
 
 vala-ccode: $(VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -C $^ $(VALAPKGS) 
@@ -32,9 +37,18 @@ vala-doc:
 	touch vala-doc;
 endif
 BUILT_SOURCES+=vala-doc
-EXTRA_DIST = $(VALASOURCES) vala-ccode libendf.vapi libendf.gir libendf.deps vala-doc
+EXTRA_DIST = $(VALASOURCES) vala-ccode libendf.vapi libendf.gir libendf.deps vala-doc test-parser-ccode
 
-$(DIST_SOURCES) : vala-ccode vala-doc
+noinst_PROGRAMS = test-parser
+BUILT_SOURCES += $(noinst_PROGRAMS:%=%.c)
+
+test_parser_LDADD = libendf.la $(GLIB_LIBS)
+test_parser_CPPFLAGS = $(GLIB_CFLAGS) -I.
+test-parser-ccode: test-parser.vala libendf.vapi
+	$(VALAC) -C $< libendf.vapi
+	touch $@
+
+$(DIST_SOURCES) : vala-ccode vala-doc test-parser-ccode
 
 MAINTAINERCLEANFILES = $(VALASOURCES:.vala=.c) libendf.h \
                        libendf.vapi libendf.deps libendf.gir \
