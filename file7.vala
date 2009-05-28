@@ -1,4 +1,16 @@
 namespace Endf {
+	/**
+	 * An object for a Section in the ENDF file.
+	 *
+	 * The most useful interfaces are `load' and
+	 * `S'.
+	 *
+	 * `load' is to load the event.content into this section 
+	 * object.
+	 *
+	 * S(E, T) returns an interpolated S 
+	 * corresponding to the reaction.
+	 */
 	public class MF7MT2 {
 		private struct Page {
 			public double [] S;

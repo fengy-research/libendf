@@ -1,4 +1,19 @@
 namespace Endf {
+	/**
+	 * Parse an ENDF tape
+	 *
+	 * The parser emits events at certain points of the stream.
+	 *
+	 * The most useful event is SectionEvent at section end,
+	 * listen to that event by setting a function to
+	 * `section_end_event' .
+	 *
+	 * In the event handler, filter the MF and MT number,
+	 * then load the event content into a Section object,
+	 * e.g, MF7MT2 or MF7MT4.
+	 *
+	 * */
+
 	public class Parser {
 
 		StringBuilder content_buffer = new StringBuilder("");
