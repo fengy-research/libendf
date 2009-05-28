@@ -13,9 +13,13 @@ libendf_la_SOURCES= \
 
 VALASOURCES = \
 	enum.vala \
+	number.vala \
 	mat-type.vala \
 	mf-type.vala \
 	mt-type.vala \
+	int-type.vala \
+	interpolation.vala \
+	file7.vala \
 	event.vala \
 	parser.vala
 
@@ -42,7 +46,7 @@ EXTRA_DIST = $(VALASOURCES) vala-ccode libendf.vapi libendf.gir libendf.deps val
 noinst_PROGRAMS = test-parser
 BUILT_SOURCES += $(noinst_PROGRAMS:%=%.c)
 
-test_parser_LDADD = libendf.la $(GLIB_LIBS)
+test_parser_LDADD = libendf.la $(GLIB_LIBS) -lm
 test_parser_CPPFLAGS = $(GLIB_CFLAGS) -I.
 test-parser-ccode: test-parser.vala libendf.vapi
 	$(VALAC) -C $< libendf.vapi

@@ -43,13 +43,13 @@ namespace Endf {
 			add_string(str);
 		}
 		public void add_char(unichar c) {
-			if(column <= 66) {
+			if(column < 66) {
 				line_buffer.append_unichar(c);
-			} else if(column <= 69) {
+			} else if(column < 70) {
 				MAT_buffer.append_unichar(c);
-			} else if(column <= 71) {
+			} else if(column < 72) {
 				MF_buffer.append_unichar(c);
-			} else if(column <= 74) {
+			} else if(column < 75) {
 				MT_buffer.append_unichar(c);
 			} else {
 				LN_buffer.append_unichar(c);
