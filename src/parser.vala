@@ -104,14 +104,12 @@ namespace Endf {
 		private int i;
 
 		public void accept_head(Card card) {
-			message("%s", card.to_string());
 			NR = (int)card.numbers[4];
 			NP = (int)card.numbers[5];
 			INT = new Interpolation(NR);
 			state = HEAD_DONE;
 		}
 		public bool accept_card(Card card) {
-			message("%s # NP = %d", card.to_string(), NP);
 			if(state == DATA_DONE) {
 				return false;
 			}
@@ -158,7 +156,6 @@ namespace Endf {
 		private int state;
 		private int i;
 		public void accept_head(Card card) {
-			message("%s", card.to_string());
 			NP = (int) card.numbers[4];
 			state = HEAD_DONE;
 			i = 0;
@@ -223,7 +220,6 @@ namespace Endf {
 		public void push_current_section() {
 			if(section != null) {
 				section.meta = meta;
-				message("%u", meta.to_uint());
 				dict.insert(section.meta, section);
 				sections.prepend((owned)section);
 			}
@@ -242,7 +238,6 @@ namespace Endf {
 		}
 		public Section? lookup(MATType MAT, MFType MF, MTType MT) {
 			Section.META meta = { MAT, MF, MT };
-			message("%u", meta.to_uint());
 			return dict.lookup(meta);
 		}
 	}
