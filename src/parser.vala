@@ -2,18 +2,10 @@ namespace Endf {
 	/**
 	 * Parse an ENDF tape
 	 *
-	 * The parser emits events at certain points of the stream.
-	 *
-	 * The most useful event is SectionEvent at section end,
-	 * listen to that event by setting a function to
-	 * `section_end_event' .
-	 *
-	 * In the event handler, filter the MF and MT number,
-	 * then load the event content into a Section object,
-	 * e.g, MF7MT2 or MF7MT4.
+	 * The parser parses each line(card) of the ENDF file,
+	 * and emits a card_event for it.
 	 *
 	 * */
-
 	public class Parser {
 		StringBuilder MAT_buffer = new StringBuilder("");
 		StringBuilder MT_buffer = new StringBuilder("");
@@ -78,32 +70,7 @@ namespace Endf {
 			add_string(str);
 		}
 	}
-	public class Section {
-		public struct META {
-			public MATType MAT;
-			public MFType MF;
-			public MTType MT;
-			public uint to_uint() {
-				return (uint)MAT * 100000 + (uint) MF * 1000 + (uint) MT;
-			}
-			public static uint hash(META h) {
-				return h.to_uint();
-			}
-			public static bool equal(META h1, META h2) {
-				return h1.to_uint() == h2.to_uint();
-			}
-		}
-		public META meta;
-		public virtual void accept_head(Card card) {
-			
-		}
-		/**
-		 * @return true if it is full.
-		 */
-		public virtual bool accept_card(Card card) {
-			return false;
-		}
-	}
+
 	public class TAB {
 		public int NR;
 		public int NP;
@@ -186,6 +153,10 @@ namespace Endf {
 		}
 	}
 
+	/**
+	 * The loader loads endf file into memory and build the Section objects.
+	 *
+	 */
 	public class Loader {
 		public HashTable<Section.META?, weak Section> dict
 		 = new HashTable<Section.META?, weak Section>(

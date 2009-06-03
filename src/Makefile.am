@@ -20,6 +20,7 @@ VALASOURCES = \
 	int-type.vala \
 	interpolation.vala \
 	event.vala \
+	section.vala \
 	mf7mt2.vala \
 	parser.vala
 

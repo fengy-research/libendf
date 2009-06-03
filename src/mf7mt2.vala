@@ -48,56 +48,69 @@ namespace Endf {
 			head.LTHR = (LTHRType) card.numbers[2];
 			state = HEAD_DONE;
 		}
+
 		public override bool accept_card(Card card) {
 			switch(head.LTHR) {
 				case LTHRType.COHERENT:
-					if(state == LISTDATA_DONE
-						&& i == COH.LT) {
-						return true;
-					}
-					if(state == HEAD_DONE) {
-						COH.LT = (int) card.numbers[2];
-						COH.T = new double[COH.LT + 1];
-						COH.T[0] = card.numbers[0];
-						tab.accept_head(card);
-						COH.E = new double[tab.NP];
-						COH.Tpages = new TPage [COH.LT + 1];
-						COH.Tpages[0].S = new double[tab.NP];
-						tab.X = COH.E;
-						tab.Y = COH.Tpages[0].S;
-						state = TABHEAD_DONE;
-						break;
-					}
-					if(state  == TABHEAD_DONE) {
-						if(!tab.accept_card(card)) {
-							COH.INT = tab.INT;
-							i = 0;
-							state = TABDATA_DONE;
-							/*recover to test the next state */
-						}
-					}
-					if(state == LISTHEAD_DONE) {
-						if(!list.accept_card(card)) {
-							state = LISTDATA_DONE;
-							i++;
-						}
-						/* recover to test the next state*/
-					}
-					if(state == TABDATA_DONE ||
-					  (state == LISTDATA_DONE
-					  && i < COH.LT)
-						) {
-						list.accept_head(card);
-						COH.Tpages[i + 1].S  = new double[list.NP];
-						list.Y = COH.Tpages[i + 1].S;
-						state = LISTHEAD_DONE;
-						break;
-					}
-					/* after all list data are done we are full */
-					assert_not_reached();
-				break;
+				return accept_card_coh(card);
+				case LTHRType.INCOHERENT:
+				return accept_card_incoh(card);
 			}
 			return false;
+		}
+
+		public bool accept_card_incoh(Card card) {
+			assert_not_reached();
+		}
+
+		public bool accept_card_coh(Card card) {
+			if(state == LISTDATA_DONE
+				&& i == COH.LT) {
+				return true;
+			}
+			if(state == HEAD_DONE) {
+				COH.LT = (int) card.numbers[2];
+				COH.T = new double[COH.LT + 1];
+				COH.T[0] = card.numbers[0];
+				tab.accept_head(card);
+				COH.E = new double[tab.NP];
+				COH.NP = tab.NP;
+				COH.NR = tab.NR;
+				COH.Tpages = new TPage [COH.LT + 1];
+				COH.Tpages[0].S = new double[tab.NP];
+				tab.X = COH.E;
+				tab.Y = COH.Tpages[0].S;
+				state = TABHEAD_DONE;
+				return false;
+			}
+
+			if(state  == TABHEAD_DONE) {
+				if(!tab.accept_card(card)) {
+					COH.INT = tab.INT;
+					i = 0;
+					state = TABDATA_DONE;
+					/*recover to test the next state */
+				}
+			}
+			if(state == LISTHEAD_DONE) {
+				if(!list.accept_card(card)) {
+					state = LISTDATA_DONE;
+					i++;
+				}
+				/* recover to test the next state*/
+			}
+			if(state == TABDATA_DONE ||
+			  (state == LISTDATA_DONE
+			  && i < COH.LT)
+				) {
+				list.accept_head(card);
+				COH.Tpages[i + 1].S  = new double[list.NP];
+				list.Y = COH.Tpages[i + 1].S;
+				state = LISTHEAD_DONE;
+				return false;
+			}
+			/* after all list data are done we are full */
+			assert_not_reached();
 		}
 	}
 }
