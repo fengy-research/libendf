@@ -3,13 +3,13 @@ libendf_la_CPPFLAGS = -DG_LOG_DOMAIN=\"ENDF\" $(GLIB_CFLAGS) $(GSL_CFLAGS)
 
 BUILT_SOURCES = vala-ccode
 
-VALAFLAGS= --library=libendf -H libendf.h
-VALADOCFLAGS = -o Documentation --package-name=libendf
+VALAFLAGS= --library=libendf-1.0 -H libendf-1.0.h
+VALADOCFLAGS = -o Documentation --package-name=libendf-1.0
 VALAPKGS = --pkg gsl
 
 libendf_la_SOURCES= \
 	$(VALASOURCES:.vala=.c)\
-	libendf.h
+	libendf-1.0.h
 
 VALASOURCES = \
 	enum.vala \
@@ -25,14 +25,13 @@ VALASOURCES = \
 
 vala-ccode: $(VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -C $^ $(VALAPKGS) 
-	echo gmodule-2.0 > libendf.deps
-	echo gsl >> libendf.deps
+	echo gmodule-2.0 > libendf-1.0.deps
+	echo gsl >> libendf-1.0.deps
 	touch vala-ccode
 
-vapi_DATA = libendf.vapi
+vapi_DATA = libendf-1.0.vapi
 vapidir=$(datadir)/vala/vapi
-libendfinclude_HEADERS = libendf.h
-libendfincludedir = $(includedir)/libendf
+include_HEADERS = libendf-1.0.h
 
 if ENABLE_VALADOC
 @VALA_DOC_RULES@
@@ -41,11 +40,11 @@ vala-doc:
 	touch vala-doc;
 endif
 BUILT_SOURCES+=vala-doc
-EXTRA_DIST = $(VALASOURCES) vala-ccode libendf.vapi libendf.gir libendf.deps vala-doc
+EXTRA_DIST = $(VALASOURCES) vala-ccode libendf-1.0.vapi libendf-1.0.gir libendf-1.0.deps vala-doc
 
 
 $(DIST_SOURCES) : vala-ccode vala-doc
 
-MAINTAINERCLEANFILES = $(VALASOURCES:.vala=.c) libendf.h \
-                       libendf.vapi libendf.deps libendf.gir \
+MAINTAINERCLEANFILES = $(VALASOURCES:.vala=.c) libendf-1.0.h \
+                       libendf-1.0.vapi libendf-1.0.deps libendf-1.0.gir \
                        Documentation
