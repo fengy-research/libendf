@@ -22,6 +22,8 @@ VALASOURCES = \
 	event.vala \
 	section.vala \
 	mf7mt2.vala \
+	tab.vala \
+	list.vala \
 	parser.vala
 
 vala-ccode: $(VALASOURCES)
