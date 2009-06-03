@@ -1,0 +1,13 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+bindir=@bindir@
+includedir=@includedir@
+datadir=@datadir@
+
+Name: libendf
+Description: Access ENDF cross section data
+Version: @VERSION@
+Requires: gobject-2.0 >= 2.12 gsl
+Libs: -L${libdir} -lendf
+Cflags: -I${includedir}
