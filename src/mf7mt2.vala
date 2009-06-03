@@ -113,6 +113,7 @@ namespace Endf {
 				) {
 				list.accept_head(card);
 				assert(list.NP == COH.NP);
+				COH.T[i + 1] = card.numbers[0];
 				COH.Tpages[i + 1].S  = new double[COH.NP];
 				COH.Tpages[i + 1].LI  = (INTType) card.numbers[2];
 				list.Y = COH.Tpages[i + 1].S;
@@ -165,10 +166,12 @@ namespace Endf {
 			if(page_range_dirty) {
 				switch(head.LTHR) {
 					case COHERENT:
-						for(int i = 1; i < COH.T.length; i++) {
-							if(COH.T[i] > T && COH.T[i - 1] <= T)
-							page_range = i -1;
-							break;
+						int i;
+						for(i = 1; i < COH.T.length; i++) {
+							if(COH.T[i] >= T && COH.T[i - 1] <= T) {
+								page_range = i -1;
+								break;
+							}
 						}
 						if(i == COH.T.length) throw new
 							Error.OVERFLOWN("T(%lf) out of range [%lf, %lf]"
@@ -209,6 +212,10 @@ namespace Endf {
 						INTType LI = COH.Tpages[page_range + 1].LI;
 						s[i] = Interpolation.eval_static(
 							LI, T, COH.T[page_range], COH.T[page_range + 1], s_low, s_high);
+						if(s[i] < 0.0) {
+							warning(" s = %lf < 0.0, s_low = %lf s_hight = %lf, page_range=%d ", s[i], s_low, s_high, page_range);
+							s[i] = 0.0;
+						}
 					} else {
 						s[i] = 0.0;
 					}
@@ -241,6 +248,8 @@ namespace Endf {
 					prepare_rdist();
 					size_t ch = rdist.discrete(rng);
 					mu = 1.0 - 2.0 * COH.E[ch] / E;
+					assert((mu >= -1.0));
+					assert((mu <= 1.0));
 				return;
 				case INCOHERENT:
 					double mu1;
