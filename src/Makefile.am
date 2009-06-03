@@ -13,7 +13,7 @@ libendf_la_SOURCES= \
 
 VALASOURCES = \
 	enum.vala \
-	number.vala \
+	error.vala \
 	mat-type.vala \
 	mf-type.vala \
 	mt-type.vala \

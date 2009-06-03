@@ -16,23 +16,23 @@ namespace Endf {
 		}
 		public bool accept_card(Card card) {
 			if( i == NR) {
-				return true;
+				return false;
 			}
 			range_end[i] = (int)card.numbers[0];
 			type[i] = (INTType) card.numbers[1];
 			i++;
 			if( i == NR) {
-				return false;
+				return true;
 			}
 			range_end[i] = (int)card.numbers[2];
 			type[i] = (INTType) card.numbers[3];
 			i++;
 			if( i == NR) {
-				return false;
+				return true;
 			}
 			range_end[i] = (int)card.numbers[4];
 			type[i] = (INTType) card.numbers[5];
-			return false;
+			return true;
 		}
 		private int find(double x, double[] xs) {
 			int xi;
@@ -53,9 +53,9 @@ namespace Endf {
 			}
 			return -1;
 		}
-		public double eval(double x, double[] xs, double[] ys) {
+		public double eval(double x, double[] xs, double[] ys) throws Error {
 			int xi = find(x, xs);
-			if(xi == -1) return double.NAN;
+			if(xi == -1) throw new Error.OVERFLOWN("value not in the range of the given data");
 			int ri = find_range(xi);
 			assert(ri >= 0 && ri < NR);
 			INTType type = type[ri];

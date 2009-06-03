@@ -1,4 +1,4 @@
-VALAPKGS = --pkg libendf
+VALAPKGS = --pkg libendf-1.0
 VALAFLAGS = --vapidir ../src
 noinst_PROGRAMS = test-parser
 

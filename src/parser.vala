@@ -13,6 +13,22 @@ namespace Endf {
 		StringBuilder NUM_buffer = new StringBuilder("");
 		public CardFunction card_function;
 		Card card = Card();
+
+		private static double parse_number(string s) {
+			unowned string endptr;
+			double radix;
+			int m = 0;
+			int m_sign = 0;
+			radix = s.to_double(out endptr);
+			unichar sign = endptr.get_char();
+			if(sign == 0 || sign.isspace()) return radix;
+			if(sign == '+') m_sign = 1;
+			if(sign == '-') m_sign = -1;
+			endptr = endptr.next_char();
+			m = endptr.to_int();
+			return radix * Math.pow(10, m_sign * m);
+		}
+
 		public void add_string(string str) {
 			int column = 0;
 			int i = 0;
@@ -26,10 +42,10 @@ namespace Endf {
 				if(column >=0 && column < 66) {
 					NUM_buffer.append_unichar(c);
 					if((column + 1) % 11 == 0) {
-						card.numbers[i] = NUM_buffer.str.to_double();
+						card.numbers[i] = parse_number(NUM_buffer.str);
 						NUM_buffer.truncate(0);
+						i++;
 					}
-					i++;
 				}
 				if(column == 66) {
 					card.end = p;
@@ -59,6 +75,7 @@ namespace Endf {
 				if(c == '\n') {
 					column = 0;
 					i = 0;
+					card.line ++;
 					if(card_function != null)
 						card_function(card);
 				}
@@ -87,45 +104,50 @@ namespace Endf {
 		private int i;
 
 		public void accept_head(Card card) {
+			message("%s", card.to_string());
 			NR = (int)card.numbers[4];
 			NP = (int)card.numbers[5];
 			INT = new Interpolation(NR);
 			state = HEAD_DONE;
 		}
 		public bool accept_card(Card card) {
+			message("%s # NP = %d", card.to_string(), NP);
 			if(state == DATA_DONE) {
-				return true;
+				return false;
 			}
 			if(state == HEAD_DONE) {
 				if(!INT.accept_card(card)) {
 					state = INT_DONE;
 				/* recover to fill the data*/
 					i = 0;
+				} else {
+					return true;
 				}
 			}
 			if(state == INT_DONE) {
 				X[i] = card.numbers[0];
 				Y[i] = card.numbers[1];
 				i++;
-				if(i == NR) {
+				if(i == NP) {
 					state = DATA_DONE;
-					return false;
+					return true;
 				}
 				X[i] = card.numbers[2];
 				Y[i] = card.numbers[3];
 				i++;
-				if(i == NR) {
+				if(i == NP) {
 					state = DATA_DONE;
-					return false;
+					return true;
 				}
 				X[i] = card.numbers[4];
 				Y[i] = card.numbers[5];
-				if(i == NR) {
+				i++;
+				if(i == NP) {
 					state = DATA_DONE;
-					return false;
+					return true;
 				}
 			}
-			return false;
+			return true;
 		}
 	}
 	public class LIST {
@@ -136,20 +158,21 @@ namespace Endf {
 		private int state;
 		private int i;
 		public void accept_head(Card card) {
+			message("%s", card.to_string());
 			NP = (int) card.numbers[4];
 			state = HEAD_DONE;
 			i = 0;
 		}
 		public bool accept_card(Card card) {
-			if(i > NP) return true;
+			if(i >= NP) return false;
 			if(state == HEAD_DONE) {
 				for(int j = 0; j < 6; j++) {
 					Y[i] = card.numbers[0];
 					i++;
-					if(i > NP) return false;
+					if(i == NP) return true;
 				}
 			}
-			return false;
+			return true;
 		}
 	}
 
@@ -190,6 +213,10 @@ namespace Endf {
 					start_new_section(card);
 					meta = card.meta;
 					return;
+				}
+			} else {
+				if(section != null) {
+					section.accept_card(card);
 				}
 			}
 		}

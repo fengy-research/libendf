@@ -8,6 +8,7 @@ for i in $M4_BOOTSTRAPS; do
 		echo Warning: file $i is not found, set M4_BOOTSTRAP_SRC_PATH.
 	fi
 done;
+cp ../vapi/gsl.vapi vapi/
 aclocal -I autotools
 libtoolize --force --automake
 autoheader

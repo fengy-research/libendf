@@ -4,6 +4,10 @@ namespace Endf {
 	 *
 	 * A Section has to implement accept_card and accept_head with
 	 * a state-machine to populate its data.
+	 *
+	 * When generating random events, the Section is also a state machine.
+	 * Set the E and T first, then use either the Inelastic interface
+	 * or the elastic interface to obtain a random event.
 	 */
 	public abstract class Section {
 		public struct META {
@@ -24,9 +28,22 @@ namespace Endf {
 		public abstract void accept_head(Card card);
 		/**
 		 * accept a data card.
-		 * @return true if it is full and the card is rejected.
-		 *         false if the card is accepted.
+		 * @return false if it is full and the card is rejected.
+		 *         true if the card is accepted.
 		 */
 		public abstract bool accept_card(Card card);
+
+		public abstract double T {get; set;}
+		public abstract double E {get; set;}
+		/**
+		 * The total cross section at this E and T*/
+		public abstract double S() throws Error;
+	}
+
+	public interface Elastic: Section {
+		public abstract void random_event(Gsl.RNG rng, out double mu) throws Error;
+	}
+	public interface Inelastic : Section {
+		public abstract double random_event(Gsl.RNG rng, out double dE, out double mu) throws Error;
 	}
 }
