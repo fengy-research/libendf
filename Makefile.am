@@ -6,4 +6,6 @@ DISTCLEANFILES =  \
                  doltcompile doltlibtool  \
                  libendf-1.0.pc
 EXTRA_DIST = \
-	autogen.sh
+	autogen.sh \
+	vapi \
+	library
