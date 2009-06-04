@@ -3396,8 +3396,9 @@ namespace Gsl
 		DEC
 	}
 	
-	public static delegate int OdeivFunction (double t, [CCode (array_length = false)] double[] y, [CCode (array_length = false)] double[] dydt, void* params);
-	public static delegate int OdeivJacobian (double t, [CCode (array_length = false)] double[] y, [CCode (array_length = false)] double[] dfdy, [CCode (array_length = false)] double[] dfdt, void* params);
+	public delegate int OdeivFunction (double t, [CCode (array_length = false)] double[] y, [CCode (array_length = false)] double[] dydt);
+	public delegate int OdeivJacobian (double t, [CCode (array_length = false)] double[] y, [CCode (array_length = false)] double[] dfdy, [CCode (array_length = false)] double[] dfdt);
+
 	public static delegate void* OdeivStepAlloc (size_t dim);
 	public static delegate int OdeivStepApply (void* state, size_t dim, double t, double h, [CCode (array_length = false)] double[] y, [CCode (array_length = false)] double[] yerr, [CCode (array_length = false)] double[] dydt_in, [CCode (array_length = false)] double[] dydt_out, OdeivSystem* dydt);
 	public static delegate int OdeivStepReset (void* state, size_t dim);
@@ -3412,7 +3413,9 @@ namespace Gsl
 	[CCode (cname="gsl_odeiv_system", cheader_filename="gsl/gsl_odeiv.h")]
 	public struct OdeivSystem
 	{
+		[CCode (delegate_target = false)]
 		public OdeivFunction function;
+		[CCode (delegate_target = false)]
 		public OdeivJacobian jacobian;
 		public size_t dimension;
 		public void* params;
