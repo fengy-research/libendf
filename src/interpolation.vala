@@ -104,7 +104,10 @@ namespace Endf {
 		 */
 		public double eval(double x, double[] xs, double[] ys) throws Error {
 			int xi = find(x, xs);
-			if(xi == -1) throw new Error.OVERFLOWN("value not in the range of the given data");
+			if(xi == -1) throw new Error.OVERFLOWN(
+				"value %lf not in the range(%lf %lf)"
+				.printf(x, xs[0], xs[xs.length - 1])
+				);
 			int ri = find_range(xi);
 			assert(ri >= 0 && ri < NR);
 			INTType type = type[ri];

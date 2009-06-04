@@ -1,10 +1,10 @@
 VALAPKGS = --pkg libendf-1.0
 VALAFLAGS = --vapidir ../src
-noinst_PROGRAMS = test-parser
+noinst_PROGRAMS = test-parser elastic
 
-test_parser_CPPFLAGS = $(GLIB_CFLAGS) $(GSL_CFLAGS) -I$(top_srcdir)/src
-test_parser_LDFLAGS = -L$(top_builddir)/src
-test_parser_LDADD = $(GLIB_LIBS) -lendf $(GSL_LIBS)
+AM_CPPFLAGS = $(GLIB_CFLAGS) $(GSL_CFLAGS) -I$(top_srcdir)/src
+AM_LDFLAGS = -L$(top_builddir)/src
+LDADD = $(GLIB_LIBS) -lendf $(GSL_LIBS)
 
 SUFFIXES = .vala .c
 .vala.c :
