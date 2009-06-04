@@ -1,4 +1,10 @@
 namespace Endf {
+	/**
+	 * Types of interpolations
+	 *
+	 * Refer to @link Interpolation .
+	 *
+	 */
 	public enum INTType {
 		HISTOGRAM = 1,
 		LINEAR_LINEAR = 2,

@@ -4,16 +4,31 @@ namespace Endf {
 	 *
 	 * The parser parses each line(card) of the ENDF file,
 	 * and emits a card_event for it.
-	 *
 	 * */
 	public class Parser {
+		public delegate void CardFunction (Card card);
 		StringBuilder MAT_buffer = new StringBuilder("");
 		StringBuilder MT_buffer = new StringBuilder("");
 		StringBuilder MF_buffer = new StringBuilder("");
 		StringBuilder NUM_buffer = new StringBuilder("");
+		/**
+		 * The callback function when a card is parsed
+		 * */
 		public CardFunction card_function;
+		/**
+		 * The internally used card, will be send to the card_function.
+		 */
 		Card card = Card();
 
+		/**
+		 * Parse a ENDF formatted number.
+		 *
+		 * Examples:
+		 *  1.12341+11
+		 *  1.231243-54
+		 *  12
+		 *   9
+		 */
 		private static double parse_number(string s) {
 			unowned string endptr;
 			double radix;
@@ -29,6 +44,9 @@ namespace Endf {
 			return radix * Math.pow(10, m_sign * m);
 		}
 
+		/**
+		 * Parse more string
+		 */
 		public void add_string(string str) {
 			int column = 0;
 			int i = 0;
@@ -81,6 +99,9 @@ namespace Endf {
 				}
 			}
 		}
+		/**
+		 * Open the file, load the content and parse it.
+		 */
 		public void add_file(string filename) throws GLib.Error {
 			string str;
 			FileUtils.get_contents(filename, out str);
@@ -90,31 +111,39 @@ namespace Endf {
 
 
 	/**
-	 * The loader loads endf file into memory and build the Section objects.
+	 * Load endf file into memory and build the Section objects.
 	 *
 	 */
 	public class Loader {
-		public HashTable<Section.META?, weak Section> dict
+		private HashTable<Section.META?, weak Section> dict
 		 = new HashTable<Section.META?, weak Section>(
 			(HashFunc) Section.META.hash,
 			(EqualFunc) Section.META.equal);
-		List<Section> sections;
+		private List<Section> sections;
 
 		private Parser parser = new Parser();
-		public Section.META meta;
-
-		public Section section;
+		private Section.META meta;
+		private Section section;
 
 		public Loader() {
 			parser.card_function = card_function;
 		}
+		/**
+		 * load more ENDF objects from a string
+		 */
 		public void add_string(string str) {
 			parser.add_string(str);
 		}
+		/**
+		 * load more ENDF objects from a file
+		 */
 		public void add_file(string filename) throws GLib.Error {
 			parser.add_file(filename);
 		}
-		public void card_function(Card card) {
+		/**
+		 * Dispatch the card event from the parser.
+		 * */
+		private void card_function(Card card) {
 			if(!Section.META.equal(meta, card.meta)) {
 				if(card.meta.MT == MTType.SECTION_END) {
 					push_current_section();
@@ -133,14 +162,22 @@ namespace Endf {
 				}
 			}
 		}
-		public void push_current_section() {
+		/**
+		 * save the current section. Invoked by card_function when the current section ends.
+		 */
+		private void push_current_section() {
 			if(section != null) {
 				section.meta = meta;
 				dict.insert(section.meta, section);
 				sections.prepend((owned)section);
 			}
 		}
-		public void start_new_section(Card card) {
+
+		/**
+		 * start a new section. Invoked by card_function when a 
+		 * new section starts.
+		 **/
+		private void start_new_section(Card card) {
 			switch(card.meta.MF) {
 				case MFType.THERMAL_SCATTERING:
 				switch(card.meta.MT) {
@@ -152,6 +189,19 @@ namespace Endf {
 				break;
 			}
 		}
+		/**
+		 * Look up the specific section from all built ENDF objects
+		 *
+		 * @param MAT
+		 *        the material id
+		 * @param MF
+		 *        the file number
+		 * @param MT
+		 *        the section number
+		 *
+		 * @return null if the section is not ever parsed,
+		 *         the specific section if it is built.
+		 */
 		public Section? lookup(MATType MAT, MFType MF, MTType MT) {
 			Section.META meta = { MAT, MF, MT };
 			return dict.lookup(meta);

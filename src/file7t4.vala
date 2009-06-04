@@ -1,3 +1,4 @@
+/* DEPRECATED */
 using UCNTracker;
 
 namespace Endf {

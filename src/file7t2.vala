@@ -1,5 +1,5 @@
 using UCNTracker;
-
+/* DEPRECATED */
 namespace Endf {
 	public enum LTHRType {
 		COHERENT = 1,
@@ -29,12 +29,12 @@ namespace Endf {
 			public INTType LI;
 		}
 		double [] T;
+
 		/**
 		 * The current range where T fits in
 		 * T is in T[T_range_index] T[T_range_index + 1].
 		 * if T_range_index = -1, T is out of range.
-		 * */
-
+		 **/
 		int T_range_index = -1;
 
 		double prepared_T;
@@ -42,6 +42,7 @@ namespace Endf {
 
 		Page [] pages;
 		double [] E;
+
 		/** 
 		 * internall used as the prepared probability at
 		 * each E.
@@ -61,20 +62,22 @@ namespace Endf {
 		int NR; /* number of interpolation ranges */
 
 		public LTHRType LTHR;
-		/* For LTHR = COHERENT */
+		/* * For LTHR = COHERENT */
 		public int LT; /* Temperature points (number of pages) - 1*/
-		/* For LTHR = INCOHERENT */
+		/* * For LTHR = INCOHERENT */
 		public double SB; /* Characteristic bound cross section (barns) */
 
-		/* Debye-Waller integral divided by the atomic mass eV-1,
-		 * as a function of T(K)*/
+		/** 
+		 * Debye-Waller integral divided by the atomic mass eV-1,
+		 * as a function of T(K)
+		 **/
 		public double[] W;
 
 		/**
 		 * Prepare the cross section, heat it to temparture T
 		 *
 		 * @return false if T is out of range;
-		 * */
+		 **/
 		public bool prepare_T(double T) {
 			T_range_index = find_T(T);
 			prepared_T = T;

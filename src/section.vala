@@ -36,13 +36,20 @@ namespace Endf {
 		public abstract double T {get; set;}
 		public abstract double E {get; set;}
 		/**
-		 * The total cross section at this E and T*/
+		 * The total cross section at this E and T
+		 **/
 		public abstract double S() throws Error;
 	}
 
+	/**
+	 * Elastic scatter cross section
+	 */
 	public interface Elastic: Section {
 		public abstract void random_event(Gsl.RNG rng, out double mu) throws Error;
 	}
+	/**
+	 * Inelastic scatter cross section
+	 */
 	public interface Inelastic : Section {
 		public abstract double random_event(Gsl.RNG rng, out double dE, out double mu) throws Error;
 	}

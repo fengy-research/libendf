@@ -1,3 +1,4 @@
+/* DEPRECATED */
 namespace Endf {
 	public double read_number(string p, out unowned string outptr) {
 		StringBuilder buffer = new StringBuilder("");

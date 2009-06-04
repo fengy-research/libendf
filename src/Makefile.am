@@ -12,6 +12,7 @@ libendf_la_SOURCES= \
 	libendf-1.0.h
 
 VALASOURCES = \
+	parser.vala \
 	enum.vala \
 	error.vala \
 	mat-type.vala \
@@ -23,8 +24,7 @@ VALASOURCES = \
 	section.vala \
 	mf7mt2.vala \
 	tab.vala \
-	list.vala \
-	parser.vala
+	list.vala
 
 vala-ccode: $(VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -C $^ $(VALAPKGS) 
