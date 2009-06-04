@@ -141,6 +141,29 @@ namespace Endf {
 		 * Incoherent data is yet not parsed.
 		 * */
 		private bool accept_card_incoh(Card card) {
+			if(state == TABDATA_DONE) {
+				return false;
+			}
+			if(state == HEAD_DONE) {
+				INC.SB = card.numbers[0];
+				tab.accept_head(card);
+				INC.NR = (int)card.numbers[4];
+				INC.NP = tab.NP;
+				INC.W = new double[tab.NP];
+				INC.T = new double[tab.NP];
+				tab.X = INC.T;
+				tab.Y = INC.W;
+				state = TABHEAD_DONE;
+				return true;
+			}
+			if(state == TABHEAD_DONE) {
+				if(!tab.accept_card(card)) {
+					state = TABDATA_DONE;
+					INC.INT = tab.INT;
+					return false;
+				}
+				return true;
+			}
 			assert_not_reached();
 		}
 
