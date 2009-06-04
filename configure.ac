@@ -4,7 +4,7 @@ AC_CONFIG_MACRO_DIR([autotools])
 AC_CONFIG_AUX_DIR([autotools])
 AC_SUBST(ACLOCAL_AMFLAGS, "-I autotools")
 AC_CONFIG_HEADERS([config.h])
-AM_INIT_AUTOMAKE([1.9 foreign])
+AM_INIT_AUTOMAKE([tar-ustar foreign subdir-objects])
 
 AM_MAINTAINER_MODE
 AC_PROG_LIBTOOL

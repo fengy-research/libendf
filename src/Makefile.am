@@ -12,19 +12,19 @@ libendf_la_SOURCES= \
 	libendf-1.0.h
 
 VALASOURCES = \
-	parser.vala \
-	enum.vala \
-	error.vala \
-	mat-type.vala \
-	mf-type.vala \
-	mt-type.vala \
-	int-type.vala \
-	interpolation.vala \
-	event.vala \
-	section.vala \
-	mf7mt2.vala \
-	tab.vala \
-	list.vala
+	parser/parser.vala \
+	parser/tab.vala \
+	parser/list.vala \
+	parser/interpolation.vala \
+	section/section.vala \
+	section/mf7mt2.vala \
+	types/event.vala \
+	types/enum.vala \
+	types/error.vala \
+	types/mat-type.vala \
+	types/mf-type.vala \
+	types/mt-type.vala \
+	types/int-type.vala
 
 vala-ccode: $(VALASOURCES)
 	$(VALAC) $(VALAFLAGS) -C $^ $(VALAPKGS) 
