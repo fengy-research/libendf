@@ -35,9 +35,10 @@ namespace Endf {
 		 */
 		public string to_string() {
 			StringBuilder sb = new StringBuilder("");
-			sb.append_printf("%d: ", line);
+			sb.append_printf("L%d ", line);
+			sb.append_printf("M%.4d F%.2d T%.3d ", meta.MAT, meta.MF, meta.MT);
 			for(int i = 0; i< 6; i++) {
-				sb.append_printf("%.011lf ", numbers[i]);
+				sb.append_printf("%e ", numbers[i]);
 			}
 			return sb.str;
 		}
