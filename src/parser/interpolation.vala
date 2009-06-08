@@ -41,9 +41,12 @@ namespace Endf {
 		 *
 		 * @return if the card is rejected.
 		 */
-		public void accept(Parser parser) {
+		public void accept(Parser parser) throws Error {
 			while(accept_card(parser.card)) {
-				parser.fetch_card();
+				if(!parser.fetch_card()) {
+					throw new 
+					Error.MALFORMED("unexpected stream end when parsing a INTERPOLATION");
+				}
 			}
 		}
 		public bool accept_card(Card card) {

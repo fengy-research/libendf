@@ -112,7 +112,7 @@ namespace Endf {
 		private TAB tab = new TAB();
 		private LIST list = new LIST();
 
-		public override void accept(Parser parser) {
+		public override void accept(Parser parser) throws Error {
 			accept_head(parser.card);
 			assert(parser.fetch_card());
 			switch(head.LTHR) {
@@ -124,7 +124,7 @@ namespace Endf {
 				break;
 			}
 		}
-		private void accept_coh(Parser parser) {
+		private void accept_coh(Parser parser) throws Error {
 			COH.LT = (int)parser.card.numbers[2];
 			COH.T = new double[COH.LT + 1];
 			COH.T[0] = parser.card.numbers[0];
@@ -144,7 +144,7 @@ namespace Endf {
 			}
 		}
 
-		private void accept_inc(Parser parser) {
+		private void accept_inc(Parser parser) throws Error {
 			INC.SB = parser.card.numbers[0];
 			INC.NR = (int)parser.card.numbers[4];
 			INC.NP = (int)parser.card.numbers[5];

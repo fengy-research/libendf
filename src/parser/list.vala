@@ -13,13 +13,15 @@ namespace Endf {
 		
 		private int i;
 
-		public void accept(Parser parser) {
+		public void accept(Parser parser) throws Error {
 			accept_head(parser.card);
 			while(parser.fetch_card()) {
 				if(!accept_card(parser.card)) {
 					return;
 				}
 			}
+			throw new
+			Error.MALFORMED("unexpected stream end when parsing a LIST");
 		}
 		private void accept_head(Card card) {
 			NP = (int) card.numbers[4];

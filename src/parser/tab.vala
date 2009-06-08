@@ -15,12 +15,14 @@ namespace Endf {
 
 		private int i;
 
-		public void accept(Parser parser) {
+		public void accept(Parser parser) throws Error {
 			accept_head(parser.card);
 			return_if_fail(parser.fetch_card());
 			INT.accept(parser);
 			while(accept_card(parser.card)) {
-				parser.fetch_card();
+				if(parser.fetch_card()) continue;
+				throw new 
+				Error.MALFORMED("unexpected stream end when parsing a TAB");
 			}
 		}
 		private void accept_head(Card card) {

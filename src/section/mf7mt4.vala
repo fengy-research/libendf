@@ -56,9 +56,13 @@ namespace Endf {
 			public Interpolation INT;
 		}
 
-		public override void accept(Parser parser) {
+		public override void accept(Parser parser) throws Error {
 			accept_head(parser.card);
-			return_if_fail(parser.fetch_card());
+			if(!parser.fetch_card()) {
+				throw new Error.MALFORMED(
+				"unexpected stream end parsing a MF7MT4 section, after the head"
+				);
+			}
 			data.LLN = (int) parser.card.numbers[2];
 			data.NI = (int) parser.card.numbers[4];
 			data.NS = (int) parser.card.numbers[5];
@@ -70,7 +74,11 @@ namespace Endf {
 			int NR = (int) parser.card.numbers[4];
 			bINT = new Interpolation(NR);
 			data.Nb = (int) parser.card.numbers[5];
-			parser.fetch_card();
+			if(!parser.fetch_card()) {
+				throw new Error.MALFORMED(
+				"unexpected stream end parsing a MF7MT4 section, after the beta interpolation data"
+				);
+			}
 			bINT.accept(parser);
 
 			bpages = new bPage[data.Nb];

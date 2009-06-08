@@ -32,7 +32,7 @@ namespace Endf {
 		 * When the function returns, parser.card should points to the
 		 * next available(unused) card.
 		 */
-		public abstract void accept(Parser parser);
+		public abstract void accept(Parser parser) throws Error;
 
 		public abstract double T {get; set;}
 		public abstract double E {get; set;}

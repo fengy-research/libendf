@@ -1,6 +1,6 @@
 namespace Endf {
 	public interface Acceptor {
-		public abstract void accept(Parser parser);
+		public abstract void accept(Parser parser) throws Error;
 	}
 	/**
 	 * Parse an ENDF tape
@@ -25,7 +25,7 @@ namespace Endf {
 		 * the card accepters.
 		 */
 		public Card card = Card();
-
+		private bool last_card_not_emitted = true;
 		/**
 		 * Parse a ENDF formatted number.
 		 *
@@ -60,8 +60,15 @@ namespace Endf {
 		public void add_string(string str) {
 			p = str;
 			while(fetch_card()) {
-				if(card_function != null)
+				while(last_card_not_emitted) {
+					/* Emit the last card */
+					last_card_not_emitted = false;
+					if(card_function == null) continue;
 					card_function(this);
+					/* card function may fetch new cards,
+					 * thus changes last_card_not_emitted
+					 * */
+				}
 			}
 		}
 		/**
@@ -113,9 +120,16 @@ namespace Endf {
 				if(c == '\n') {
 					card.line ++;
 					p = p.next_char();
+					/* This card is finished, and the card_function
+					 * is not emitted */
+					last_card_not_emitted = true;
 					return true;
 				}
 			}
+			/* At end of the stream, reset card_not_emitted, avoiding
+			 * a deadloop in add_string.
+			 * */
+			last_card_not_emitted = false;
 			return false;
 		}
 		/**
@@ -150,7 +164,7 @@ namespace Endf {
 		/**
 		 * load more ENDF objects from a string
 		 */
-		public void add_string(string str) {
+		public void add_string(string str) throws Error {
 			parser.add_string(str);
 		}
 		/**
@@ -195,12 +209,16 @@ namespace Endf {
 		 * start a new section. Invoked by card_function when a 
 		 * new section starts.
 		 **/
-		private void start_new_section(Card card) {
+		private void start_new_section(Card card) throws Error {
+			message("new section %s", card.to_string());
 			switch(card.meta.MF) {
 				case MFType.THERMAL_SCATTERING:
 				switch(card.meta.MT) {
 					case MTType.ELASTIC:
 						section = new MF7MT2();
+					break;
+					case MTType.REACTION_Z_N:
+						section = new MF7MT4();
 					break;
 				}
 				break;
