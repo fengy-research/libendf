@@ -10,7 +10,7 @@ public void main(string[] args) {
 	mf7mt2.T = 296;
 	weak double [] E = mf7mt2.COH.E;
 
-	for(int i = 0; i< E.length; i++) {
+	for(int i = 0; i< E.length ; i++) {
 		mf7mt2.E = E[i];
 		stdout.printf("%lf %lf\n", E[i], mf7mt2.S());
 	}

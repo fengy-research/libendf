@@ -1,4 +1,7 @@
 namespace Endf {
+	public interface Acceptor {
+		public abstract void accept(Parser parser);
+	}
 	/**
 	 * Parse an ENDF tape
 	 *
@@ -16,7 +19,10 @@ namespace Endf {
 		 * */
 		public CardFunction card_function;
 		/**
-		 * The internally used card, will be send to the card_function.
+		 * The internally bufferred card.
+		 *
+		 * The card is send to card_function, as well as accessed by
+		 * the card accepters.
 		 */
 		public Card card = Card();
 
@@ -30,7 +36,7 @@ namespace Endf {
 		 *   9
 		 */
 		private static double parse_number(string s) {
-			unowned string endptr;
+			weak string endptr;
 			double radix;
 			int m = 0;
 			int m_sign = 0;
@@ -58,6 +64,10 @@ namespace Endf {
 					card_function(this);
 			}
 		}
+		/**
+		 * Fetch the next card to the parser's internal buffer
+		 *
+		 * */
 		public bool fetch_card() {
 			unichar c = p.get_char();
 			int column = 0;
@@ -154,7 +164,7 @@ namespace Endf {
 		 * */
 		private void card_function(Parser parser) {
 			Card card = parser.card;
-			if(!Section.META.equal(meta, card.meta)) {
+			if(!Section.META.equal(ref meta, ref card.meta)) {
 				if(card.meta.MT == MTType.SECTION_END) {
 					push_current_section();
 					meta = card.meta;

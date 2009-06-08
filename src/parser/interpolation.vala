@@ -7,7 +7,7 @@ namespace Endf {
 	 * 
 	 * Example: FIXME
 	 */
-	public class Interpolation {
+	public class Interpolation : Acceptor {
 		INTType [] type;
 		int[] range_end;
 		int NR;
@@ -41,6 +41,11 @@ namespace Endf {
 		 *
 		 * @return if the card is rejected.
 		 */
+		public void accept(Parser parser) {
+			while(accept_card(parser.card)) {
+				parser.fetch_card();
+			}
+		}
 		public bool accept_card(Card card) {
 			if( i == NR) {
 				return false;
@@ -72,9 +77,13 @@ namespace Endf {
 		private int find(double x, double[] xs) {
 			int xi;
 			for(xi = 1; xi < xs.length; xi++) {
-				if(x >= xs[xi-1] && x <= xs[xi]) {
+				if(x >= xs[xi-1] && x < xs[xi]) {
 					return xi - 1;
 				}
+			}
+			/* xi == max(length, 1) */
+			if(x == xs[xi - 1]) {
+				return xi - 1;
 			}
 			return -1;
 		}
@@ -108,12 +117,17 @@ namespace Endf {
 				"value %lf not in the range(%lf %lf)"
 				.printf(x, xs[0], xs[xs.length - 1])
 				);
-			int ri = find_range(xi);
-			assert(ri >= 0 && ri < NR);
-			INTType type = type[ri];
-			return eval_static(type, 
-				x, xs[xi], xs[xi + 1], 
-				ys[xi], ys[xi + 1]);
+			if(xi < xs.length - 1) {
+				int ri = find_range(xi);
+				assert(ri >= 0 && ri < NR);
+				INTType type = type[ri];
+				return eval_static(type, 
+					x, xs[xi], xs[xi + 1], 
+					ys[xi], ys[xi + 1]);
+			} else {
+				/*xi == xs.length - 1*/
+				return ys[xs.length - 1];
+			}
 		}
 		private static double eval_linlin(
 			double x, double x0, double x1, double y0, double y1) {

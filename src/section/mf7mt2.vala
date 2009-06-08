@@ -111,14 +111,6 @@ namespace Endf {
 		/* Tab parser and list parser */
 		private TAB tab = new TAB();
 		private LIST list = new LIST();
-		/* Internal states */
-		private int state;
-		private const int HEAD_DONE = 0;
-		private const int TABHEAD_DONE = 1;
-		private const int TABDATA_DONE = 2;
-		private const int LISTHEAD_DONE = 3;
-		private const int LISTDATA_DONE = 4;
-		private int i;
 
 		public override void accept(Parser parser) {
 			accept_head(parser.card);
@@ -166,7 +158,6 @@ namespace Endf {
 			head.ZA = card.numbers[0];
 			head.AWR = card.numbers[1];
 			head.LTHR = (int) card.numbers[2];
-			state = HEAD_DONE;
 		}
 
 		/* private members for the Elastic interface */
@@ -246,7 +237,8 @@ namespace Endf {
 					page_range_dirty = false;
 				break;
 				case INCOHERENT:
-					for(int i = 1; i < INC.T.length; i++) {
+					int i;
+					for(i = 1; i < INC.T.length; i++) {
 						if(INC.T[i] > T && INC.T[i - 1] <= T)
 						page_range = i -1;
 						break;

@@ -2,14 +2,14 @@ namespace Endf {
 	/**
 	 * A Section corresponds to a section in the ENDF file.
 	 *
-	 * A Section has to implement accept_card and accept_head with
-	 * a state-machine to populate its data.
+	 * A section implements the Acceptor interface, which accept cards from 
+	 * parser and builts its content.
 	 *
 	 * When generating random events, the Section is also a state machine.
 	 * Set the E and T first, then use either the Inelastic interface
 	 * or the elastic interface to obtain a random event.
 	 */
-	public abstract class Section {
+	public abstract class Section : Acceptor {
 		public struct META {
 			public MATType MAT;
 			public MFType MF;
@@ -17,10 +17,10 @@ namespace Endf {
 			public uint to_uint() {
 				return (uint)MAT * 100000 + (uint) MF * 1000 + (uint) MT;
 			}
-			public static uint hash(META h) {
+			public static uint hash(ref META h) {
 				return h.to_uint();
 			}
-			public static bool equal(META h1, META h2) {
+			public static bool equal(ref META h1, ref META h2) {
 				return h1.to_uint() == h2.to_uint();
 			}
 		}
