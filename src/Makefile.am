@@ -16,10 +16,10 @@ VALASOURCES = \
 	parser/tab.vala \
 	parser/list.vala \
 	parser/interpolation.vala \
+	parser/card.vala \
 	section/section.vala \
 	section/mf7mt2.vala \
 	section/mf7mt4.vala \
-	types/event.vala \
 	types/enum.vala \
 	types/error.vala \
 	types/mat-type.vala \
