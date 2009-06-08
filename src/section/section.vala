@@ -33,6 +33,7 @@ namespace Endf {
 		 * next available(unused) card.
 		 */
 		public abstract void accept(Parser parser) throws Error;
+		public abstract string to_string(StringBuilder? builder = null);
 
 		public abstract double T {get; set;}
 		public abstract double E {get; set;}
@@ -40,6 +41,16 @@ namespace Endf {
 		 * The total cross section at this E and T
 		 **/
 		public abstract double S() throws Error;
+		protected static void array_to_string(StringBuilder sb, double[] array, string name) {
+			sb.append_printf("%s %d entries\n", name, array.length);
+			int i;
+			for(i = 0; i< array.length; i++) {
+				sb.append_printf("%le ", array[i]);
+				if((i + 1) % 6 == 0) sb.append_unichar('\n');
+			}
+			if(i % 6 != 0)
+				sb.append_unichar('\n');
+		}
 	}
 
 	/**

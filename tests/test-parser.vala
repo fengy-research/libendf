@@ -9,6 +9,7 @@ public void main(string[] args) {
 	var mf7mt2 = s2 as MF7MT2;
 	mf7mt2.T = 296;
 	weak double [] E = mf7mt2.COH.E;
+	stdout.printf(s2.to_string());
 
 	/*
 	for(int i = 0; i< E.length ; i++) {
@@ -20,6 +21,7 @@ public void main(string[] args) {
 	assert(s4 is MF7MT4);
 	var mf7mt4 = s4 as MF7MT4;
 
+	stdout.printf(s4.to_string());
 	/*
 	mf7mt2.E = 0.03;
 	mf7mt2.T = 1000;

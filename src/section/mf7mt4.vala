@@ -126,6 +126,7 @@ namespace Endf {
 				for(int j = 0; j< data.LT; j++) {
 					bpages[i].Tpages[j + 1].LI = (INTType) parser.card.numbers[2];
 					bpages[i].Tpages[j + 1].S = (owned) tab.Y;
+					data.T[j + 1] = parser.card.numbers[0];
 					list.accept(parser);
 				}
 			}
@@ -147,6 +148,22 @@ namespace Endf {
 
 		public override double S() {
 			return 0.0;
+		}
+		public override string to_string(StringBuilder? sb = null) {
+			StringBuilder _sb;
+			if(sb == null) {
+				_sb = new StringBuilder("");
+				sb = _sb;
+			}
+			sb.append_printf("ZA = %e AWR=%e LAT=%d LASYM=%d\n",
+				head.ZA, head.AWR, head.LAT, head.LASYM);
+
+			array_to_string(sb, data.B, "scatters");
+			array_to_string(sb, data.T, "T grid");
+			array_to_string(sb, data.b, "beta grid");
+			array_to_string(sb, data.a, "alpha grid");
+
+			return sb.str;
 		}
 	}
 }

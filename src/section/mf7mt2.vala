@@ -329,5 +329,25 @@ namespace Endf {
 				return;
 			}
 		}
+		public override string to_string(StringBuilder? sb = null) {
+			StringBuilder _sb;
+			if(sb == null) {
+				_sb = new StringBuilder("");
+				sb = _sb;
+			}
+			sb.append_printf("ZA=%e AWR=%e LTHR=%d\n",
+				head.ZA, head.AWR, head.LTHR);
+
+			switch(head.LTHR) {
+				case COHERENT:
+					array_to_string(sb, COH.T, "T grid");
+					array_to_string(sb, COH.E, "E grid");
+				break;
+				case INCOHERENT:
+					array_to_string(sb, INC.T, "T grid");
+				break;
+			}
+			return sb.str;
+		}
 	}
 }
