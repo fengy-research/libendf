@@ -10,10 +10,8 @@ namespace Endf {
 		public int NR;
 		public int NP;
 		public Interpolation INT;
-		[CCode (array_length = false)]
-		public weak double[] X;
-		[CCode (array_length = false)]
-		public weak double[] Y;
+		public double[] X;
+		public double[] Y;
 
 		private int state;
 		private const int HEAD_DONE = 0;
@@ -21,13 +19,24 @@ namespace Endf {
 		private const int DATA_DONE = 2;
 		private int i;
 
-		public void accept_head(Card card) {
+		public void accept(Parser parser) {
+			accept_head(parser.card);
+			while(parser.fetch_card()) {
+				if(!accept_card(parser.card)) {
+					return;
+				}
+			}
+			return;
+		}
+		private void accept_head(Card card) {
 			NR = (int)card.numbers[4];
 			NP = (int)card.numbers[5];
+			X = new double[NP];
+			Y = new double[NP];
 			INT = new Interpolation(NR);
 			state = HEAD_DONE;
 		}
-		public bool accept_card(Card card) {
+		private bool accept_card(Card card) {
 			if(state == DATA_DONE) {
 				return false;
 			}

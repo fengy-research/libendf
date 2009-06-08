@@ -25,13 +25,14 @@ namespace Endf {
 			}
 		}
 		public META meta;
-		public abstract void accept_head(Card card);
+
 		/**
-		 * accept a data card.
-		 * @return false if it is full and the card is rejected.
-		 *         true if the card is accepted.
+		 * Accept cards for this section from parser.
+		 *
+		 * When the function returns, parser.card should points to the
+		 * next available(unused) card.
 		 */
-		public abstract bool accept_card(Card card);
+		public abstract void accept(Parser parser);
 
 		public abstract double T {get; set;}
 		public abstract double E {get; set;}

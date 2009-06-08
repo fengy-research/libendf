@@ -6,7 +6,7 @@ namespace Endf {
 	 * and emits a card_event for it.
 	 * */
 	public class Parser {
-		public delegate void CardFunction (Card card);
+		public delegate void CardFunction (Parser parser);
 		StringBuilder MAT_buffer = new StringBuilder("");
 		StringBuilder MT_buffer = new StringBuilder("");
 		StringBuilder MF_buffer = new StringBuilder("");
@@ -18,7 +18,7 @@ namespace Endf {
 		/**
 		 * The internally used card, will be send to the card_function.
 		 */
-		Card card = Card();
+		public Card card = Card();
 
 		/**
 		 * Parse a ENDF formatted number.
@@ -45,13 +45,23 @@ namespace Endf {
 		}
 
 		/**
+		 * The current cursor in the string being parsed.
+		 */
+		private weak string p;
+		/**
 		 * Parse more string
 		 */
 		public void add_string(string str) {
+			p = str;
+			while(fetch_card()) {
+				if(card_function != null)
+					card_function(this);
+			}
+		}
+		public bool fetch_card() {
+			unichar c = p.get_char();
 			int column = 0;
 			int i = 0;
-			weak string p = str;
-			unichar c = p.get_char();
 			for(c = p.get_char(); c != 0;
 				p = p.next_char(), c = p.get_char()) {
 				if(column == 0) {
@@ -91,13 +101,12 @@ namespace Endf {
 				}
 				column++;
 				if(c == '\n') {
-					column = 0;
-					i = 0;
 					card.line ++;
-					if(card_function != null)
-						card_function(card);
+					p = p.next_char();
+					return true;
 				}
 			}
+			return false;
 		}
 		/**
 		 * Open the file, load the content and parse it.
@@ -143,7 +152,8 @@ namespace Endf {
 		/**
 		 * Dispatch the card event from the parser.
 		 * */
-		private void card_function(Card card) {
+		private void card_function(Parser parser) {
+			Card card = parser.card;
 			if(!Section.META.equal(meta, card.meta)) {
 				if(card.meta.MT == MTType.SECTION_END) {
 					push_current_section();
@@ -157,9 +167,7 @@ namespace Endf {
 					return;
 				}
 			} else {
-				if(section != null) {
-					section.accept_card(card);
-				}
+				return;
 			}
 		}
 		/**
@@ -183,11 +191,12 @@ namespace Endf {
 				switch(card.meta.MT) {
 					case MTType.ELASTIC:
 						section = new MF7MT2();
-						section.accept_head(card);
 					break;
 				}
 				break;
 			}
+			if(section != null)
+				section.accept(parser);
 		}
 		/**
 		 * Look up the specific section from all built ENDF objects

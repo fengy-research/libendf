@@ -30,7 +30,7 @@ namespace Endf {
 		/**
 		 * Data are organized into pages by the temperature.
 		 * */
-		private struct TPage {
+		public struct TPage {
 			/**
 			 * S[i] is the summed differential cross section up to
 			 * E[i]
@@ -44,7 +44,7 @@ namespace Endf {
 		/**
 		 * Coherent scattering data.
 		 * */
-		private struct COHDataType {
+		public struct COHDataType {
 			/**
 			 * number of interpolation ranges with respect of E.
 			 * */
@@ -77,7 +77,7 @@ namespace Endf {
 		/**
 		 * Incoherent scattering  data
 		 * */
-		private struct INCDataType {
+		public struct INCDataType {
 			/**
 			 * the characteristic bound cross section in barns
 			 * */
@@ -105,8 +105,8 @@ namespace Endf {
 			public Interpolation INT;
 		}
 
-		private COHDataType COH;
-		private INCDataType INC;
+		public COHDataType COH;
+		public INCDataType INC;
 
 		/* Tab parser and list parser */
 		private TAB tab = new TAB();
@@ -120,117 +120,54 @@ namespace Endf {
 		private const int LISTDATA_DONE = 4;
 		private int i;
 
-		public override void accept_head(Card card) {
+		public override void accept(Parser parser) {
+			accept_head(parser.card);
+			assert(parser.fetch_card());
+			switch(head.LTHR) {
+				case COHERENT:
+					accept_coh(parser);
+				break;
+				case INCOHERENT:
+					accept_inc(parser);
+				break;
+			}
+		}
+		private void accept_coh(Parser parser) {
+			COH.LT = (int)parser.card.numbers[2];
+			COH.T = new double[COH.LT + 1];
+			COH.T[0] = parser.card.numbers[0];
+			COH.NP = tab.NP;
+			COH.NR = tab.NR;
+			COH.Tpages = new TPage [COH.LT + 1];
+			tab.accept(parser);
+			COH.E = (owned) tab.X;
+			COH.Tpages[0].S = (owned) tab.Y;
+			COH.INT = tab.INT;
+
+			for(int i = 0; i < COH.LT; i++) {
+				COH.T[i + 1] = parser.card.numbers[0];
+				COH.Tpages[i + 1].LI  = (INTType) parser.card.numbers[2];
+				list.accept(parser);
+				COH.Tpages[i + 1].S  = (owned) list.Y;
+			}
+		}
+
+		private void accept_inc(Parser parser) {
+			INC.SB = parser.card.numbers[0];
+			INC.NR = (int)parser.card.numbers[4];
+			INC.NP = (int)parser.card.numbers[5];
+			tab.accept(parser);
+			INC.INT = tab.INT;
+			INC.T = (owned) tab.X;
+			INC.W = (owned) tab.Y;
+		}
+
+		private void accept_head(Card card) {
 			head.ZA = card.numbers[0];
 			head.AWR = card.numbers[1];
 			head.LTHR = (int) card.numbers[2];
 			state = HEAD_DONE;
 		}
-
-		public override bool accept_card(Card card) {
-			switch(head.LTHR) {
-				case COHERENT:
-				return accept_card_coh(card);
-				case INCOHERENT:
-				return accept_card_incoh(card);
-			}
-			return false;
-		}
-
-		/**
-		 * Incoherent data is yet not parsed.
-		 * */
-		private bool accept_card_incoh(Card card) {
-			if(state == TABDATA_DONE) {
-				return false;
-			}
-			if(state == HEAD_DONE) {
-				INC.SB = card.numbers[0];
-				tab.accept_head(card);
-				INC.NR = (int)card.numbers[4];
-				INC.NP = tab.NP;
-				INC.W = new double[tab.NP];
-				INC.T = new double[tab.NP];
-				tab.X = INC.T;
-				tab.Y = INC.W;
-				state = TABHEAD_DONE;
-				return true;
-			}
-			if(state == TABHEAD_DONE) {
-				if(!tab.accept_card(card)) {
-					state = TABDATA_DONE;
-					INC.INT = tab.INT;
-					return false;
-				}
-				return true;
-			}
-			assert_not_reached();
-		}
-
-		/**
-		 * parse coherent data cards.
-		 *
-		 * @return whether the card is rejected.
-		 */
-		private bool accept_card_coh(Card card) {
-			if(state == LISTDATA_DONE
-				&& i == COH.LT) {
-				return false;
-			}
-			if(state == HEAD_DONE) {
-				COH.LT = (int) card.numbers[2];
-				COH.T = new double[COH.LT + 1];
-				COH.T[0] = card.numbers[0];
-				tab.accept_head(card);
-				COH.E = new double[tab.NP];
-				COH.NP = tab.NP;
-				COH.NR = tab.NR;
-				COH.Tpages = new TPage [COH.LT + 1];
-				COH.Tpages[0].S = new double[tab.NP];
-				tab.X = COH.E;
-				tab.Y = COH.Tpages[0].S;
-				state = TABHEAD_DONE;
-				return true;
-			}
-
-			if(state  == TABHEAD_DONE) {
-				if(!tab.accept_card(card)) {
-					COH.INT = tab.INT;
-					i = 0;
-					state = TABDATA_DONE;
-					/*recover to test the next state */
-				} else {
-					return true;
-				}
-			}
-			if(state == LISTHEAD_DONE) {
-				assert(list.Y != null);
-				if(!list.accept_card(card)) {
-					state = LISTDATA_DONE;
-					i++;
-				/* recover to test the next state*/
-				} else {
-					return true;
-				}
-			}
-			if(state == TABDATA_DONE ||
-			  (state == LISTDATA_DONE
-			  && i < COH.LT)
-				) {
-				list.accept_head(card);
-				assert(list.NP == COH.NP);
-				COH.T[i + 1] = card.numbers[0];
-				COH.Tpages[i + 1].S  = new double[COH.NP];
-				COH.Tpages[i + 1].LI  = (INTType) card.numbers[2];
-				list.Y = COH.Tpages[i + 1].S;
-				assert(list.Y != null);
-				state = LISTHEAD_DONE;
-				return true;
-			}
-			/* after all list data are done we are full */
-			assert_not_reached();
-		}
-
 
 		/* private members for the Elastic interface */
 		private double _T;
