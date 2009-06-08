@@ -35,7 +35,7 @@ namespace Endf {
 		private bool accept_card(Card card) {
 			if(i >= NP) return false;
 			for(int j = 0; j < 6; j++) {
-				Y[i] = card.numbers[0];
+				Y[i] = card.numbers[j];
 				i++;
 				if(i == NP) return true;
 			}
