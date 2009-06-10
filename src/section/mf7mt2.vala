@@ -128,10 +128,10 @@ namespace Endf {
 			COH.LT = (int)parser.card.numbers[2];
 			COH.T = new double[COH.LT + 1];
 			COH.T[0] = parser.card.numbers[0];
-			COH.NP = tab.NP;
-			COH.NR = tab.NR;
 			COH.Tpages = new TPage [COH.LT + 1];
 			tab.accept(parser);
+			COH.NP = tab.NP;
+			COH.NR = tab.NR;
 			COH.E = (owned) tab.X;
 			COH.Tpages[0].S = (owned) tab.Y;
 			COH.INT = tab.INT;
