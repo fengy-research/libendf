@@ -53,6 +53,19 @@ namespace Endf {
 		}
 	}
 
+	protected static int search_double(double foo, double[] array) throws Error {
+		int i;
+		for(i = 1; i < array.length; i++) {
+			if(array[i] > foo && array[i - 1] <= foo) {
+				return i - 1;
+			}
+		}
+		throw new
+			Error.OVERFLOWN(
+			"%le out of range %le %le".printf(
+			foo, array[0], array[array.length - 1])
+			);
+	}
 	/**
 	 * Elastic scatter cross section
 	 */

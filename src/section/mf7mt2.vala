@@ -221,30 +221,15 @@ namespace Endf {
 			if(!page_range_dirty) return;
 			switch(head.LTHR) {
 				case COHERENT:
-					int i;
-					for(i = 1; i < COH.T.length; i++) {
-						if(COH.T[i] >= T && COH.T[i - 1] <= T) {
-							page_range = i -1;
-							break;
-						}
-					}
-					if(i == COH.T.length) throw new
-						Error.OVERFLOWN("T(%lf) out of range [%lf, %lf]"
-						.printf(T, COH.T[0], COH.T[COH.T.length -1]));
+					page_range = search_double(T, COH.T);
+
 					/* do the E interpolation */
 					S0 = COH.INT.eval(E, COH.E, COH.Tpages[page_range].S);
 					S1 = COH.INT.eval(E, COH.E, COH.Tpages[page_range + 1].S);
 					page_range_dirty = false;
 				break;
 				case INCOHERENT:
-					int i;
-					for(i = 1; i < INC.T.length; i++) {
-						if(INC.T[i] > T && INC.T[i - 1] <= T)
-						page_range = i -1;
-						break;
-					}
-					if(i == this.INC.T.length) throw new
-						Error.OVERFLOWN("T out of range");
+					page_range = search_double(T, INC.T);
 					/* do the W interpolation */
 					W = INC.INT.eval(T, INC.T, INC.W);
 
