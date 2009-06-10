@@ -15,7 +15,8 @@ private const OptionEntry[] options = {
 	{"temprature", 'T', 0, OptionArg.DOUBLE, out T, "Temprature", "in K"},
 	{"energy", 'E', 0, OptionArg.DOUBLE, out E, "Energy", "in EV"},
 	{"count", 'c', 0, OptionArg.INT, out count, "number of events", "N"},
-	{"file", 'F', 0, OptionArg.FILENAME, out filename, "endf file", "filenaem"}
+	{"file", 'F', 0, OptionArg.FILENAME, out filename, "endf file", "filenaem"},
+	{null}
 };
 
 public int main(string[] args) {
@@ -23,6 +24,7 @@ public int main(string[] args) {
 	var opc = new OptionContext("generating random mu for an elastic section");
 
 	opc.add_main_entries (options, null);
+	opc.set_help_enabled(true);
 	opc.parse(ref args);
 
 	Gsl.RNG rng = new Gsl.RNG(Gsl.RNGTypes.mt19937);
