@@ -33,5 +33,6 @@ libendf-1.0.pc
 Makefile 
 src/Makefile
 tests/Makefile
+tools/Makefile
 ])
 AC_OUTPUT
