@@ -5,12 +5,31 @@ namespace Endf {
 	 *
 	 * */
 	public class MF7MT4 : Section {
+		/**
+		 * The real temperature is used to compute alpha and beta.
+		 * */
 		public const int LAT_ACTURAL = 0;
-		public const int LAT_0_0253_K = 1;
-		public const int SYMMETRIC = 0;
-		public const int ASYMMETRIC = 1;
-		public const int DIRECT = 0;
-		public const int LN_S = 0;
+		/**
+		 * The fake temperature kT0 = 0.0253eV is used to compute alpha and beta.
+		 * */
+		public const int LAT_FAKE = 1;
+		private const double kT0 = 0.0253;
+		/**
+		 * S is symmetric by beta = 0
+		 * */
+		public const int LASYM_SYMMETRIC = 0;
+		/**
+		 * S is asymmetric by beta = 0
+		 * */
+		public const int LASYM_ASYMMETRIC = 1;
+		/**
+		 * The true value of S is stored.
+		 * */
+		public const int LLN_DIRECT = 0;
+		/**
+		 * log S is stored in the file.
+		 */
+		public const int LLN_LOG = 0;
 
 
 		public struct HEAD {
@@ -37,6 +56,7 @@ namespace Endf {
 		}
 
 		public Interpolation bINT;
+		public Interpolation aINT;
 		public DATA data;
 		public override double T{get; set;}
 		public override double E{get; set;}
@@ -112,7 +132,7 @@ namespace Endf {
 					 * grid data
 					 */
 					data.a = (owned)tab.X;
-					bINT = tab.INT;
+					aINT = tab.INT;
 				} else {
 					/*
 					 * And happily panic if the new grid doesn't match
@@ -130,11 +150,12 @@ namespace Endf {
 					list.accept(parser);
 				}
 			}
-			for(int i = 0; i < data.NS; i++) {
+			Effpages = new EffPage[data.NS + 1];
+			for(int i = 0; i < data.NS + 1; i++) {
 				tab.accept(parser);
 				Effpages[i].Tint = (owned) tab.X;
 				Effpages[i].Teff = (owned) tab.Y;
-				Effpages[i].INT = tab.INT;
+				Effpages[i].INT = (owned) tab.INT;
 			}
 		}
 		private void accept_head(Card card) {
@@ -149,6 +170,95 @@ namespace Endf {
 		public override double S() {
 			return 0.0;
 		}
+		private double Teff(double T, int n) {
+			return Effpages[n].INT.eval(T, Effpages[n].Tint, Effpages[n].Teff);
+		}
+
+		private const double k = 8.617343e-5; /*EV * K^-1*/
+		private double MSb(int n) {
+			double MSf;
+			double A;
+			if(n == 0) {
+				/* the principle scattering kernel is stored
+				 * as a differnt format. Shit.*/
+				MSf = data.B[0];
+				A = data.B[2];
+			} else {
+				MSf = data.B[n * 6 + 1];
+				A = data.B[n * 6 + 2];
+			}
+			double r = (A + 1.0) / A;
+			return r * r * MSf;
+		}
+		private double a(double Eout, double mu) {
+			double A0 = data.B[2];
+			double rt = (Eout + E - 2.0 * mu * Math.sqrt(E * Eout)) ;
+			switch(head.LAT) {
+				case LAT_ACTURAL:
+					return rt / ( k * T * A0);
+				case LAT_FAKE:
+					return rt / (kT0 * A0);
+			}
+			assert_not_reached();
+		}
+		private double b(double Eout) {
+			double A0 = data.B[2];
+			double rt = (Eout - E);
+			switch(head.LAT) {
+				case LAT_ACTURAL:
+					return rt / ( k * T);
+				case LAT_FAKE:
+					return rt / (kT0);
+			}
+			assert_not_reached();
+		}
+		public double dS(double Eout, double mu) throws Error {
+			double a = this.a(Eout, mu);
+			double b = this.b(Eout);
+			bool use_sct = false;
+			double pr_cs = 0.0;
+			double non_pr_cs = 0.0;
+			double rt = 0.0;
+
+			int ai = 0;
+			int bi = 0;
+			try {
+				ai = search_double(a, data.a);
+				bi = search_double(head.LASYM == LASYM_SYMMETRIC?Math.fabs(b):b, data.b);
+			} catch(Error.OVERFLOWN e) {
+				use_sct = true;
+			}
+
+			if(use_sct) {
+				/* ignore the real data, use Sct for testing */
+				pr_cs = MSb(0) * Math.exp( - b * 0.5 + lnSct(a, b, T, 0));
+				for(int n = 1; n < data.NS; n++) {
+					int non_pr_type = (int)data.B[n * 6];
+					assert(non_pr_type == 0); /* Only SCT is implemented */
+					non_pr_cs += MSb(n) * Math.exp( -b * 0.5 + lnSct(a, b, T, n));
+				}
+				rt = pr_cs + non_pr_cs;
+			} else {
+				int Ti = search_double(T, data.T);
+				/*FIXME: INTERPOLATION INTERPOLATION FUCK THE INTERPOLATIONS!*/
+				double S_bl = aINT.eval_with_index(a, ai, data.a, bpages[bi].Tpages[Ti].S);
+				double S_bh = aINT.eval_with_index(a, ai, data.a, bpages[bi + 1].Tpages[Ti].S);
+				
+			}
+			rt *= Math.sqrt(Eout / E) / (4.0 * Math.PI * k * T);
+			return rt;
+		}
+
+		private double lnSct(double a, double b, double T, int n) {
+			double sigma = 4.0 * Math.fabs(a) * Teff(T, n) / T;
+			double r = Math.fabs(a) - b;
+			r = r * r / sigma  + Math.fabs(b) / 2.0;
+			double d = Math.PI * sigma;
+			return - r - 0.5 * Math.log(d);
+		}
+		/**
+		 * Format the section to a string
+		 * */
 		public override string to_string(StringBuilder? sb = null) {
 			StringBuilder _sb;
 			if(sb == null) {

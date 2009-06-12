@@ -120,6 +120,9 @@ namespace Endf {
 				"value %lf not in the range(%lf %lf)"
 				.printf(x, xs[0], xs[xs.length - 1])
 				);
+			return eval_with_index(x, xi, xs, ys);
+		}
+		public double eval_with_index(double x, int xi, double[] xs, double [] ys) {
 			if(xi < xs.length - 1) {
 				int ri = find_range(xi);
 				assert(ri >= 0 && ri < NR);
