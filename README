@@ -1,0 +1,101 @@
+libendf - The library to parse and access the ENDF libraries.
+
+This library contains three parts: the parser, the section representations, the compiler.
+
+1. The ENDF parser
+==================
+
+ENDF is organized with weird names show respect to the history of computing.
+This is a small table mapping ENDF terminology to mordern terminology. In this 
+README we stick to the ENDF terms unless mentioned otherwise.
+
+LIBRARY :: collection of files
+TAPE :: file
+FILE :: data section in a file
+SECTION :: sub data section in a section
+CARD :: line
+
+Each FILE is a self-contained set of data describing vairous aspects of the physical
+properties of one material(MAT). The type of FILE is given by an interger, MF. 
+For example, MF = 7 is describing the THERMAL SCATTERING properties of a material.
+This type of file is the most relavant one to UCNTracker and cold neutrons. All known
+ MF types are defined in types/mf-type.vala.
+
+Each aspect of the physical property is collected into a SECTION. The type of sections
+are given by another interger, MT. Nobody knows why the name is MT. For UCNTracker the
+relavent MT numbers are 2 and 4, representing Elastic and Inelastic scattering. In FILE 7,
+the full human understandable names of SECTION 2 and SECTION 4 are Elastic Thermal Scattering
+and Inelastic Thermal Scattering, respectively. The SECTION numbers (MT) are defined in
+types/mt-type.vala . Notice that in the source file 4 = MTType.REACTION_Z_N; consider Z = N(eutron),
+this would be an alias of inelastic scattering.
+
+TAPE is a collection of related or irrelated FILEs. Usually if the TAPE is downloaded from 
+bnl[1], they are a bundle of thermal properties of the same material.
+
+[1] http://www.nndc.bnl.gov/sigma/index.jsp?as=graphite&lib=endfb7.0&nsub=12
+
+CARD is showing even more repsect to the old computing dates. A Card is a 80 single-byte
+character line(The encoding is ASCII for all exsiting ENDF files). The first 66 bytes 
+are mostly real numbers written in scientific convention (X.XXX+xx or X.XXXX-xx), with exceptions
+in the description SECTIONs where they are plain strings. The numbers are parsed by 
+Parser::parse_number, which is a private member of Parser.
+The remaining bytes in the line are control(meta) bytes, indicating which 
+MATERIAL, FILE, SECTION the card is in. In other words they are the expected 
+state of the FSA parser. The Loader(in parser/parser.vala) seldomly use these meta byte unless
+determining the context switching from one SECTION to another.
+
+The Loader(parser/parser.vala) loads ENDF TAPEs and creates the Section(ENDF VALA representation)
+as the TAPES are being parsed. Section is an instance of Acceptor, who accepts 
+inputs from a parser, and constructs itself.
+
+The parsing model is not straight forward. The Parser emits a callback function Parser.card_function
+when a CARD is parsed(PUSH); however, the Loader also asks Accepters to fetch(Parser.fetch)
+inputs from the parser(PULL). 
+The mixture of PUSH and PULL simplifies the internal states of the accepters.
+The rule to coordinate PUSH and PULL is that after Accpeter.accept, the current card of the Parser
+(Parser.card) is pointing to the next unused card.
+
+2. The ENDF representation in VALA
+==================================
+
+Section (section/section.vala) [Abstract]
+
+A Section is an ENDF Section. When the T(emperature) and (initial)E(nergy) is set, 
+Section.S gives the total scattering cross section. Each realized Section should
+implement this method, as well as T and E. Because the interpolation which requires
+searching in an array is slow, it is recommended to store the interpolation data and update
+them only if T and E are modified. Refer to (section/mf7mt2.vala) as an example.
+
+
+Elastic (section/section.vala) [Interface]
+
+Elastic Events are characterised by the cosine of the scattering angle. The conventional 
+name of this cosine is mu. 
+Elastic.random_event generates a random mu for a particular Section. The Section must implement
+this member function to give the properly distributed mu.
+
+MF7MT2 is an example of Elastic Section.
+
+Inelastic (section/section.vala) [Interface]
+
+Inelastic events are characterized by the consine of the scatternig angle and the exit energy
+(Eout).
+
+Inelastic.random_event generates a random mu and a random Eout for a particular Section.
+The underlying implementation of the section should implement this member function.
+
+Refer to complicity mentioned in the next section.
+
+3. The ENDF compiler
+===================
+
+UCNTracker cannot directly make use of the ENDF data in FILE 7. It is due to the difficulty
+of efficiently generating 2-dimensional distributed inelastic events by an arbitrary
+distribution.
+
+The trick is to compile the ENDF data into a prepared form. In this form,
+the equal-probability events are stored rather than the raw distributions.
+
+The process is yet mysterious and not implemented.
+
+
