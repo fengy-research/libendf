@@ -146,10 +146,10 @@ namespace Endf {
 					}
 				}
 				for(int j = 0; j< data.LT; j++) {
-					data.LI[j + 1] = (INTType) parser.card.numbers[2];
-					bpages[i].Tpages[j + 1].S = (owned) tab.Y;
 					data.T[j + 1] = parser.card.numbers[0];
+					data.LI[j + 1] = (INTType) parser.card.numbers[2];
 					list.accept(parser);
+					bpages[i].Tpages[j + 1].S = (owned) list.Y;
 				}
 			}
 			Effpages = new EffPage[data.NS + 1];
