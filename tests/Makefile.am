@@ -1,6 +1,6 @@
 VALAPKGS = --pkg libendf-1.0
 VALAFLAGS = --vapidir ../src
-noinst_PROGRAMS = test-parser elastic
+noinst_PROGRAMS = test-mf7mt2 test-mf7mt4 elastic
 
 AM_CPPFLAGS = $(GLIB_CFLAGS) $(GSL_CFLAGS) -I$(top_srcdir)/src
 AM_LDFLAGS = -L$(top_builddir)/src
