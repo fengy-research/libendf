@@ -226,6 +226,7 @@ namespace Endf {
 				bi = search_double(head.LASYM == LASYM_SYMMETRIC?Math.fabs(b):b, data.b);
 			} catch(Error.OVERFLOWN e) {
 				use_sct = true;
+				warning("using sct");
 			}
 
 			if(use_sct) {
@@ -278,9 +279,12 @@ namespace Endf {
 					   b, data.b[bi], data.b[bi+1], S_bl, S_bh);
 			switch(data.LLN) {
 				case LLN_DIRECT:
-					if(S != 0.0)
+					if(S >= 0.0)
 					return Math.log(S);
+					else {
+					warning("s = %lf assuming 0", S);
 					return -999.99; /*As suggested in the spec*/
+					}
 				case LLN_LOG:
 					return S;
 			}
