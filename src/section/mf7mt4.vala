@@ -29,7 +29,7 @@ namespace Endf {
 		/**
 		 * log S is stored in the file.
 		 */
-		public const int LLN_LOG = 0;
+		public const int LLN_LOG = 1;
 
 
 		public struct HEAD {
@@ -53,6 +53,7 @@ namespace Endf {
 
 			public int LT;
 			public double[] T;
+			public INTType[] LI;
 		}
 
 		public Interpolation bINT;
@@ -63,12 +64,12 @@ namespace Endf {
 
 		bPage[] bpages;
 		EffPage[] Effpages;
+
 		public struct bPage {
 			public TPage[] Tpages;
 		}
 		public struct TPage {
 			public double[] S;
-			public INTType LI;
 		}
 		public struct EffPage {
 			public double[] Tint;
@@ -109,6 +110,7 @@ namespace Endf {
 					data.LT = (int) parser.card.numbers[2];
 					data.T = new double[data.LT + 1];
 					data.T[0] = parser.card.numbers[0];
+					data.LI = new INTType[data.LT + 1];
 				} else {
 					/* where or not each beta page has the same
 					 * temperature grid is not documented.
@@ -144,7 +146,7 @@ namespace Endf {
 					}
 				}
 				for(int j = 0; j< data.LT; j++) {
-					bpages[i].Tpages[j + 1].LI = (INTType) parser.card.numbers[2];
+					data.LI[j + 1] = (INTType) parser.card.numbers[2];
 					bpages[i].Tpages[j + 1].S = (owned) tab.Y;
 					data.T[j + 1] = parser.card.numbers[0];
 					list.accept(parser);
@@ -216,9 +218,6 @@ namespace Endf {
 			double a = this.a(Eout, mu);
 			double b = this.b(Eout);
 			bool use_sct = false;
-			double pr_cs = 0.0;
-			double non_pr_cs = 0.0;
-			double rt = 0.0;
 
 			int ai = 0;
 			int bi = 0;
@@ -230,25 +229,63 @@ namespace Endf {
 			}
 
 			if(use_sct) {
+				double rt = 0.0;
 				/* ignore the real data, use Sct for testing */
-				pr_cs = MSb(0) * Math.exp( - b * 0.5 + lnSct(a, b, T, 0));
+				double pr_cs = MSb(0) * Math.exp( - b * 0.5 + lnSct(a, b, T, 0));
+				double non_pr_cs = 0.0;
 				for(int n = 1; n < data.NS; n++) {
 					int non_pr_type = (int)data.B[n * 6];
 					assert(non_pr_type == 0); /* Only SCT is implemented */
 					non_pr_cs += MSb(n) * Math.exp( -b * 0.5 + lnSct(a, b, T, n));
 				}
 				rt = pr_cs + non_pr_cs;
+				rt *= Math.sqrt(Eout / E) / (4.0 * Math.PI * k * T);
+				return rt;
 			} else {
 				int Ti = search_double(T, data.T);
-				/*FIXME: INTERPOLATION INTERPOLATION FUCK THE INTERPOLATIONS!*/
-				double S_bl = aINT.eval_with_index(a, ai, data.a, bpages[bi].Tpages[Ti].S);
-				double S_bh = aINT.eval_with_index(a, ai, data.a, bpages[bi + 1].Tpages[Ti].S);
-				
+				double rt;
+				double pr_cs_Tl = MSb(0) * Math.exp( - b * 0.5 + lnS(a, b, ai, bi, Ti));
+				double pr_cs_Th = MSb(0) * Math.exp( - b * 0.5 + lnS(a, b, ai, bi, Ti + 1));
+				double Th = data.T[Ti + 1];
+				double Tl = data.T[Ti];
+				double non_pr_cs_Th = 0.0;
+				double non_pr_cs_Tl = 0.0;
+				for(int n = 1; n < data.NS; n++) {
+					int non_pr_type = (int)data.B[n * 6];
+					assert(non_pr_type == 0); /* Only SCT is implemented */
+					non_pr_cs_Tl += MSb(n) * Math.exp( -b * 0.5 + lnSct(a, b, Tl, n));
+					non_pr_cs_Th += MSb(n) * Math.exp( -b * 0.5 + lnSct(a, b, Th, n));
+				}
+				double rt_Th = pr_cs_Th + non_pr_cs_Th;
+				double rt_Tl = pr_cs_Tl + non_pr_cs_Tl;
+				rt_Th *= Math.sqrt(Eout / E) / (4.0 * Math.PI * k * Th);
+				rt_Tl *= Math.sqrt(Eout / E) / (4.0 * Math.PI * k * Tl);
+
+				rt = Interpolation.eval_static(
+					data.LI[Ti + 1],
+					T,
+					Tl, Th,
+					rt_Tl,
+					rt_Th);
+				return rt;
 			}
-			rt *= Math.sqrt(Eout / E) / (4.0 * Math.PI * k * T);
-			return rt;
 		}
 
+		private double lnS(double a, double b, int ai, int bi, int Ti) {
+			double S_bl = aINT.eval_by_index(a, ai, data.a, bpages[bi].Tpages[Ti].S);
+			double S_bh = aINT.eval_by_index(a, ai, data.a, bpages[bi + 1].Tpages[Ti].S);
+			double S = Interpolation.eval_static(bINT.get_int_type_by_index(bi), 
+					   b, data.b[bi], data.b[bi+1], S_bl, S_bh);
+			switch(data.LLN) {
+				case LLN_DIRECT:
+					if(S != 0.0)
+					return Math.log(S);
+					return -999.99; /*As suggested in the spec*/
+				case LLN_LOG:
+					return S;
+			}
+			return S;
+		}
 		private double lnSct(double a, double b, double T, int n) {
 			double sigma = 4.0 * Math.fabs(a) * Teff(T, n) / T;
 			double r = Math.fabs(a) - b;

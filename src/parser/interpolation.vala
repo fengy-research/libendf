@@ -8,13 +8,13 @@ namespace Endf {
 	 * Example: FIXME
 	 */
 	public class Interpolation : Acceptor {
-		INTType [] type;
-		int[] range_end;
-		int NR;
+		public INTType [] type;
+		public int[] range_end;
+		public int NR;
 		/**
 		 * The index of the last empty range to be filled in.
 		 * */
-		int i;
+		public int i;
 
 		/**
 		 * Creates an Interpolation with NR ranges.
@@ -105,6 +105,12 @@ namespace Endf {
 			}
 			return -1;
 		}
+		public INTType get_int_type_by_index(int index) {
+			int ri = find_range(index);
+			assert(ri >= 0 && ri < NR);
+			INTType type = type[ri];
+			return type;
+		}
 		/**
 		 * Evaluate the interpolation of y.
 		 *
@@ -120,14 +126,11 @@ namespace Endf {
 				"value %lf not in the range(%lf %lf)"
 				.printf(x, xs[0], xs[xs.length - 1])
 				);
-			return eval_with_index(x, xi, xs, ys);
+			return eval_by_index(x, xi, xs, ys);
 		}
-		public double eval_with_index(double x, int xi, double[] xs, double [] ys) {
+		public double eval_by_index(double x, int xi, double[] xs, double [] ys) {
 			if(xi < xs.length - 1) {
-				int ri = find_range(xi);
-				assert(ri >= 0 && ri < NR);
-				INTType type = type[ri];
-				return eval_static(type, 
+				return eval_static(get_int_type_by_index(xi), 
 					x, xs[xi], xs[xi + 1], 
 					ys[xi], ys[xi + 1]);
 			} else {
