@@ -221,6 +221,7 @@ namespace Endf {
 
 			int ai = 0;
 			int bi = 0;
+			if(b == 0.0) throw new Error.OVERFLOWN("Eout = E is not Inelastic");
 			try {
 				ai = search_double(a, data.a);
 				bi = search_double(head.LASYM == LASYM_SYMMETRIC?Math.fabs(b):b, data.b);
