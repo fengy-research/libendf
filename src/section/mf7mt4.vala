@@ -226,7 +226,7 @@ namespace Endf {
 				bi = search_double(head.LASYM == LASYM_SYMMETRIC?Math.fabs(b):b, data.b);
 			} catch(Error.OVERFLOWN e) {
 				use_sct = true;
-				warning("using sct");
+				warning("using sct for a=%le b=%le Eout=%le mu=%le", a, b, Eout, mu);
 			}
 
 			if(use_sct) {
