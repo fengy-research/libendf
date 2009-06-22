@@ -217,14 +217,17 @@ namespace Endf {
 		public double dS(double Eout, double mu) throws Error {
 			double a = this.a(Eout, mu);
 			double b = this.b(Eout);
+			double b_maybe_abs = head.LASYM==LASYM_SYMMETRIC?Math.fabs(b):b;
+
 			bool use_sct = false;
 
 			int ai = 0;
 			int bi = 0;
-			if(b == 0.0) throw new Error.OVERFLOWN("Eout = E is not Inelastic");
+			/* the inelastic cs doesn't carry the elastic one */
+			if(b == 0.0) return 0.0;
 			try {
 				ai = search_double(a, data.a);
-				bi = search_double(head.LASYM == LASYM_SYMMETRIC?Math.fabs(b):b, data.b);
+				bi = search_double(b_maybe_abs, data.b);
 			} catch(Error.OVERFLOWN e) {
 				use_sct = true;
 				warning("using sct for a=%le b=%le Eout=%le mu=%le", a, b, Eout, mu);
