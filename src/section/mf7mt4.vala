@@ -265,7 +265,6 @@ namespace Endf {
 				double rt_Tl = pr_cs_Tl + non_pr_cs_Tl;
 				rt_Th *= Math.sqrt(Eout / E) / (4.0 * Math.PI * k * Th);
 				rt_Tl *= Math.sqrt(Eout / E) / (4.0 * Math.PI * k * Tl);
-				message("%le %le", rt_Th, rt_Tl);
 
 				rt = Interpolation.eval_static(
 					data.LI[Ti + 1],
