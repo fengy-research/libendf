@@ -149,7 +149,9 @@ namespace Endf {
 		public static double eval_static(INTType type,
 			double x,
 			double x0, double x1, double y0, double y1) {
+			assert(x >= x0 && x <= x1);
 			/*only linear is done */
+			if(y0 == y1) return y0;
 			assert(x0 != x1);
 			switch(type) {
 				case INTType.HISTOGRAM:
