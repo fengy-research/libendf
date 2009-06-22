@@ -28,13 +28,7 @@ namespace Endf {
 			range_end = new int[NR];
 			i = 0;
 		}
-		/**
-		 * Modify a range manually.
-		 */
-		public void set_range(int id, int range_end, INTType type) {
-			this.range_end[id] = range_end;
-			this.type[id] = type;
-		}
+
 		/**
 		 * Parse a card. Never reuse an Interpolation object after it has been
 		 * parsed.
