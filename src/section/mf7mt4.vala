@@ -249,8 +249,8 @@ namespace Endf {
 			} else {
 				int Ti = search_double(T, data.T);
 				double rt;
-				double pr_cs_Tl = MSb(0) * Math.exp( - b * 0.5 + lnS(a, b, ai, bi, Ti));
-				double pr_cs_Th = MSb(0) * Math.exp( - b * 0.5 + lnS(a, b, ai, bi, Ti + 1));
+				double pr_cs_Tl = MSb(0) * Math.exp( - b * 0.5 + lnS(a, b_maybe_abs, ai, bi, Ti));
+				double pr_cs_Th = MSb(0) * Math.exp( - b * 0.5 + lnS(a, b_maybe_abs, ai, bi, Ti + 1));
 				double Th = data.T[Ti + 1];
 				double Tl = data.T[Ti];
 				double non_pr_cs_Th = 0.0;
@@ -265,6 +265,7 @@ namespace Endf {
 				double rt_Tl = pr_cs_Tl + non_pr_cs_Tl;
 				rt_Th *= Math.sqrt(Eout / E) / (4.0 * Math.PI * k * Th);
 				rt_Tl *= Math.sqrt(Eout / E) / (4.0 * Math.PI * k * Tl);
+				message("%le %le", rt_Th, rt_Tl);
 
 				rt = Interpolation.eval_static(
 					data.LI[Ti + 1],
@@ -281,6 +282,7 @@ namespace Endf {
 			double S_bh = aINT.eval_by_index(a, ai, data.a, bpages[bi + 1].Tpages[Ti].S);
 			double S = Interpolation.eval_static(bINT.get_int_type_by_index(bi), 
 					   b, data.b[bi], data.b[bi+1], S_bl, S_bh);
+
 			switch(data.LLN) {
 				case LLN_DIRECT:
 					if(S >= 0.0)
@@ -292,7 +294,7 @@ namespace Endf {
 				case LLN_LOG:
 					return S;
 			}
-			return S;
+			assert_not_reached();
 		}
 		private double lnSct(double a, double b, double T, int n) {
 			double sigma = 4.0 * Math.fabs(a) * Teff(T, n) / T;
