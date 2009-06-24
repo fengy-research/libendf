@@ -30,7 +30,8 @@ AC_SUBST(GSL_LIBS)
 
 AC_CONFIG_FILES([
 libendf-1.0.pc
-Makefile 
+libendf-1.0.spec
+Makefile
 src/Makefile
 tests/Makefile
 tools/Makefile

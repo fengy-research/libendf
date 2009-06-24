@@ -8,6 +8,7 @@ DISTCLEANFILES =  \
                  libendf-1.0.pc
 EXTRA_DIST = \
 	autogen.sh \
+	libendf-1.0.spec \
 	vapi \
 	library \
 	README
