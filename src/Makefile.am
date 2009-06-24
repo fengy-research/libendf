@@ -41,10 +41,16 @@ if ENABLE_VALADOC
 @VALA_DOC_RULES@
 else
 vala-doc:
+	mkdir -p Documentation
 	touch vala-doc;
 endif
 BUILT_SOURCES+=vala-doc
-EXTRA_DIST = $(VALASOURCES) vala-ccode libendf-1.0.vapi libendf-1.0.deps vala-doc
+EXTRA_DIST = $(VALASOURCES) \
+             vala-ccode \
+             libendf-1.0.vapi \
+             libendf-1.0.deps \
+             vala-doc \
+             Documentation
 
 
 $(DIST_SOURCES) : vala-ccode vala-doc
