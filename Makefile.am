@@ -1,4 +1,4 @@
-SUBDIRS = src tests
+SUBDIRS = src tests tools
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libendf-1.0.pc

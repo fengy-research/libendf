@@ -42,9 +42,11 @@ if ENABLE_VALADOC
 else
 vala-doc:
 	mkdir -p Documentation
-	touch vala-doc;
+	touch vala-doc
 endif
+
 BUILT_SOURCES+=vala-doc
+
 EXTRA_DIST = $(VALASOURCES) \
              vala-ccode \
              libendf-1.0.vapi \
