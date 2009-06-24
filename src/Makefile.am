@@ -44,11 +44,11 @@ vala-doc:
 	touch vala-doc;
 endif
 BUILT_SOURCES+=vala-doc
-EXTRA_DIST = $(VALASOURCES) vala-ccode libendf-1.0.vapi libendf-1.0.gir libendf-1.0.deps vala-doc
+EXTRA_DIST = $(VALASOURCES) vala-ccode libendf-1.0.vapi libendf-1.0.deps vala-doc
 
 
 $(DIST_SOURCES) : vala-ccode vala-doc
 
 MAINTAINERCLEANFILES = $(VALASOURCES:.vala=.c) libendf-1.0.h \
-                       libendf-1.0.vapi libendf-1.0.deps libendf-1.0.gir \
+                       libendf-1.0.vapi libendf-1.0.deps \
                        Documentation
