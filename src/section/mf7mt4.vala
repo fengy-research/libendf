@@ -166,8 +166,8 @@ namespace Endf {
 			head.LAT = (int) card.numbers[3];
 			head.LASYM = (int) card.numbers[4];
 		}
-		private LIST list = new LIST();
-		private TAB tab = new TAB();
+		private LISTBuilder list = new LISTBuilder();
+		private TABBuilder tab = new TABBuilder();
 
 		public override double S() {
 			return 0.0;
@@ -223,14 +223,20 @@ namespace Endf {
 
 			int ai = 0;
 			int bi = 0;
+			bool a_ok = false;
 			/* the inelastic cs doesn't carry the elastic one */
 			if(b == 0.0) return 0.0;
 			try {
 				ai = search_double(a, data.a);
+				a_ok = true;
 				bi = search_double(b_maybe_abs, data.b);
 			} catch(Error.OVERFLOWN e) {
 				use_sct = true;
 				warning("using sct for a=%le b=%le Eout=%le mu=%le", a, b, Eout, mu);
+				if(a_ok) {
+					warning("b out of range");
+				} else
+					warning("a out of range");
 			}
 
 			if(use_sct) {

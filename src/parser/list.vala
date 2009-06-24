@@ -3,11 +3,14 @@ namespace Endf {
 	/**
 	 * Parse an endf LIST element.
 	 *
-	 * The storage has to be fed into Y before any call to accept_card is made.
+	 * After the input has been accepted from the parser, Y will be the accepted list
+	 * of double numbers.
 	 *
+	 * The caller of this builder shall then take away the ownership of Y;
 	 * */
-	public class LIST : Acceptor {
-		public int NP;
+	public class LISTBuilder : Acceptor {
+		/* Deprecated. Used by the internal */
+		private int NP;
 		/* The array accepting the list values */
 		public double[] Y;
 		

@@ -3,14 +3,28 @@ namespace Endf {
 	/**
 	 * Parse an ENDF TAB element
 	 *
-	 * The storage has to be filled to X and Y before accept_card is invoked.
-	 * The interpolation is built and accessible from INT.
+	 * After the input has been accepted fromthe parser, X, Y, and INT contains the
+	 * parsed data list and interpolation data for this TAB.
+	 *
+	 * The caller shall then take away the ownership of X, Y, and INT.
+	 *
 	 */
-	public class TAB : Acceptor {
-		public int NR;
-		public int NP;
+	public class TABBuilder : Acceptor {
+		/* Public access deprecated */
+		private int NR;
+		/* Public access deprecated */
+		private int NP;
+		/**
+		 * The interpolation object. Take away when made.
+		 * */
 		public Interpolation INT;
+		/**
+		 * The tabulated data for X. Take away when made.
+		 * */
 		public double[] X;
+		/**
+		 * The tabulated data for Y. Take away when made.
+		 * */
 		public double[] Y;
 
 		private int i;
@@ -25,6 +39,7 @@ namespace Endf {
 				Error.MALFORMED("unexpected stream end when parsing a TAB");
 			}
 		}
+
 		private void accept_head(Card card) {
 			NR = (int)card.numbers[4];
 			NP = (int)card.numbers[5];

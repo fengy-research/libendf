@@ -109,8 +109,8 @@ namespace Endf {
 		public INCDataType INC;
 
 		/* Tab parser and list parser */
-		private TAB tab = new TAB();
-		private LIST list = new LIST();
+		private TABBuilder tab = new TABBuilder();
+		private LISTBuilder list = new LISTBuilder();
 
 		public override void accept(Parser parser) throws Error {
 			accept_head(parser.card);
@@ -125,13 +125,13 @@ namespace Endf {
 			}
 		}
 		private void accept_coh(Parser parser) throws Error {
+			COH.NP = (int)parser.card.numbers[5];
+			COH.NR = (int)parser.card.numbers[4];
 			COH.LT = (int)parser.card.numbers[2];
 			COH.T = new double[COH.LT + 1];
 			COH.T[0] = parser.card.numbers[0];
 			COH.Tpages = new TPage [COH.LT + 1];
 			tab.accept(parser);
-			COH.NP = tab.NP;
-			COH.NR = tab.NR;
 			COH.E = (owned) tab.X;
 			COH.Tpages[0].S = (owned) tab.Y;
 			COH.INT = tab.INT;
