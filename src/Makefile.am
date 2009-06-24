@@ -33,7 +33,7 @@ vala-ccode: $(VALASOURCES)
 	echo gsl >> libendf-1.0.deps
 	touch vala-ccode
 
-vapi_DATA = libendf-1.0.vapi
+vapi_DATA = libendf-1.0.vapi libendf-1.0.deps
 vapidir=$(datadir)/vala/vapi
 include_HEADERS = libendf-1.0.h
 
